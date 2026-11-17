@@ -48,7 +48,6 @@
 ## ✨ What is Shrey Book Companion?
 
 **Shrey Book Companion** is a fully-featured, AI-powered PDF reading app that lives in a **single HTML file**. No installation. No server. No build process. Just open it in a browser and start reading.
-
 It combines the power of **Google Gemini AI**, **Firebase**, and **browser-native storage** to give you a reading experience that rivals dedicated apps — completely free.
 
 <br/>
@@ -62,7 +61,7 @@ It combines the power of **Google Gemini AI**, **Firebase**, and **browser-nativ
 ### 📚 Smart PDF Reader
 - **Render any PDF** directly in the browser using PDF.js
 - **Chapter detection** — automatically finds chapters via PDF outline, TOC scan, AI detection, or regex fallback
-- **Page thumbnails** strip for quick navigation
+- **Page thumbnails** Strip for quick navigation
 - **Zoom controls** — scale from 50% to 300%
 - **Reading progress bar** — real-time top bar and sidebar display
 - **Prominent page counter** — always visible in nav and sidebar
