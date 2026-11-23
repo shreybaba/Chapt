@@ -1,0 +1,291 @@
+/* ─── PDF Reader View Styles ─── */
+#readerView {
+  flex-direction: column;
+  height: 100%;
+}
+
+.rnav {
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 1rem;
+  background: var(--s1);
+  border-bottom: 1px solid var(--bdr);
+  z-index: 20;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--bdr);
+  border-radius: 7px;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: var(--txt2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background: var(--s2);
+  color: var(--txt);
+  border-color: var(--bdr2);
+}
+
+.back-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.r-file {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--txt);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px;
+}
+
+.r-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  display: none;
+}
+
+/* Page Counter Pill */
+.page-counter-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.page-counter-pill .pcp-num {
+  color: var(--txt);
+}
+
+.page-counter-pill .pcp-sep {
+  color: var(--txt3);
+}
+
+.page-counter-pill .pcp-total {
+  color: var(--txt2);
+}
+
+/* Zoom Controls */
+.zoom-ctl {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.zoom-ctl button {
+  background: none;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--txt2);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.zoom-ctl button:hover {
+  background: var(--s3);
+  color: var(--txt);
+}
+
+.zoom-ctl button svg {
+  width: 12px;
+  height: 12px;
+}
+
+.zoom-val {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--txt2);
+  min-width: 40px;
+  text-align: center;
+}
+
+.nav-icon-btn {
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--txt2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.nav-icon-btn:hover {
+  background: var(--s3);
+  color: var(--txt);
+  border-color: var(--bdr2);
+}
+
+.nav-icon-btn.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--blue);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.nav-icon-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Reading Progress Bar under Navigation */
+.r-prog {
+  height: 3px;
+  flex-shrink: 0;
+  background: var(--bdr);
+}
+
+.r-pfill {
+  height: 100%;
+  width: 0%;
+  background: var(--g1);
+  transition: width 0.15s ease;
+}
+
+/* Reader Split Main */
+.r-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Thumbnails Strip */
+.thumb-strip {
+  width: 88px;
+  flex-shrink: 0;
+  background: var(--s1);
+  border-right: 1px solid var(--bdr);
+  overflow-y: auto;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+  transition: width 0.2s, padding 0.2s;
+}
+
+.thumb-strip.off {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: none;
+}
+
+.th-item {
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.th-item:hover {
+  border-color: var(--bdr2);
+}
+
+.th-item.active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 1px var(--blue);
+}
+
+.th-item canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.th-num {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #eee;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1px 0;
+}
+
+/* PDF Viewer Container */
+.pdf-viewer {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  background: #05050a;
+  position: relative;
+  min-width: 0;
+}
+
+.pdf-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 1.5rem;
+}
+
+.pg-wrap {
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.pg-wrap canvas {
+  display: block;
+  max-width: 100%;
+}
+
+.pg-lbl {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 9px;
+  color: #999;
+  pointer-events: none;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 6px;
+  border-radius: 4px;
+}

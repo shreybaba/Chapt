@@ -22,18 +22,28 @@ A clean, modular, and privacy-focused web-based PDF reader with automatic chapte
 
 ```text
 project-pdf/
-├── index.html          # Clean semantic HTML layout
+├── index.html                   # Clean semantic HTML layout
 ├── css/
-│   └── style.css       # Unified design system and layout styling
+│   ├── style.css                # Master stylesheet importing all modules
+│   ├── base/
+│   │   ├── variables.css        # Colors, theme variables & tokens
+│   │   └── reset.css            # Resets, scrollbars & keyframes
+│   ├── components/
+│   │   ├── nav.css              # Top navigation bar
+│   │   └── modals.css           # Loading overlays, delete modal & toasts
+│   └── views/
+│       ├── library.css          # Book cards, grid & library controls
+│       ├── reader.css           # PDF canvas viewer, zoom & thumbnails
+│       └── chapters.css         # Chapters sidebar & TOC index
 ├── js/
-│   ├── storage.js      # IndexedDB binary storage & metadata manager
-│   ├── chapters.js     # Untouched chapter/index extraction engine
-│   ├── reader.js       # PDF.js page rendering, zoom, and scroll tracker
-│   ├── library.js      # Library view, book cards, search, and delete
-│   └── app.js          # App lifecycle, file upload, and event bindings
-├── icon-192.png        # App icons
+│   ├── storage.js               # IndexedDB binary storage & metadata manager
+│   ├── chapters.js              # Untouched chapter/index extraction engine
+│   ├── reader.js                # PDF.js page rendering, zoom & scroll tracker
+│   ├── library.js               # Library view, book cards, search & delete
+│   └── app.js                   # App lifecycle, file upload & event bindings
+├── icon-192.png                 # App icons
 ├── icon-512.png
-└── LICENSE             # MIT License
+└── LICENSE                      # MIT License
 ```
 
 ---

@@ -1,0 +1,116 @@
+/* ─── Top Navigation Header ─── */
+.dnav {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  background: var(--s1);
+  border-bottom: 1px solid var(--bdr);
+  z-index: 50;
+}
+
+.d-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.d-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--g1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+.d-logo svg {
+  width: 17px;
+  height: 17px;
+  color: #fff;
+}
+
+.d-brand {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.d-brand span {
+  background: var(--g1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--txt2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.nav-tab:hover {
+  background: var(--s2);
+  color: var(--txt);
+}
+
+.nav-tab.active {
+  background: var(--s2);
+  border-color: var(--bdr2);
+  color: var(--txt);
+}
+
+.nav-tab svg {
+  width: 14px;
+  height: 14px;
+}
+
+.d-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.d-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  background: var(--g1);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.25);
+}
+
+.d-upload-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.d-upload-btn svg {
+  width: 14px;
+  height: 14px;
+}
