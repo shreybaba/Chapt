@@ -150,7 +150,7 @@ You can also open `index.html` directly in a compatible browser, although using 
 ### Using CHAPT
 
 1. Open the application.
-2. Click **+ Add PDF** or drag and drop a PDF into the library.
+2. Click **+ Add PDFs** or drag and drop a PDF into the library.
 3. Let CHAPT analyze the document and extract its chapter hierarchy.
 4. Select a chapter or subtopic to navigate directly to it.
 5. Continue reading with your progress saved locally.
