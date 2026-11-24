@@ -1,4 +1,4 @@
-# CHAPT
+# <img src="assets/chapt-logo.png" width="48" align="center" alt="CHAPT Logo"> CHAPT
 
 ### Read. Navigate. Understand.
 
@@ -72,10 +72,12 @@ CHAPT follows a simple document-processing workflow:
 ## Project Structure
 
 ```text
-project-pdf/
+Chapt/
 │
 ├── index.html
 │
+├── assets/
+|   └── chapt-logo.png
 ├── css/
 │   ├── style.css
 │   ├── base/
@@ -97,7 +99,6 @@ project-pdf/
 │   └── app.js
 │
 ├── icon-192.png
-├── icon-512.png
 └── LICENSE
 ```
 
@@ -114,13 +115,13 @@ project-pdf/
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/shreybaba/project-pdf-.git
+git clone https://github.com/shreybaba/Chapt.git
 ```
 
 **2. Navigate to the project directory**
 
 ```bash
-cd project-pdf-
+cd Chapt
 ```
 
 **3. Start a local server**
