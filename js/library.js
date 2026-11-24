@@ -46,24 +46,17 @@ const LibraryManager = (() => {
         <div class="empty-library" style="grid-column: 1 / -1;">
           <div class="empty-icon">📚</div>
           <div class="empty-title">${searchQuery ? 'No matching books found' : 'Your Library is Empty'}</div>
-          <div class="empty-sub">${searchQuery ? 'Try another search term.' : 'Click below to add a single PDF or import multiple books at once.'}</div>
+          <div class="empty-sub">${searchQuery ? 'Try another search term.' : 'Click below to add PDF books from your device.'}</div>
           ${searchQuery ? '' : `
             <div class="empty-actions">
-              <button class="d-upload-btn d-upload-btn-secondary" onclick="App.triggerMultiUpload()" title="Add multiple books">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+              <button class="lib-add-btn" onclick="App.triggerAddBooks()" title="Add PDF book(s)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                   <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                   <line x1="12" y1="6" x2="12" y2="12"/>
                   <line x1="9" y1="9" x2="15" y2="9"/>
                 </svg>
-                Add Multiple Books
-              </button>
-              <button class="d-upload-btn" onclick="App.triggerUpload()" title="Add a single PDF book">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add PDF
+                Add Books
               </button>
             </div>
           `}
@@ -278,19 +271,21 @@ const LibraryManager = (() => {
     }
 
     const total = validFiles.length;
-    App.showLoading(true, `Adding ${total} books...`, 'Starting batch import...');
+    App.showLoading(true, total === 1 ? 'Adding book...' : `Adding ${total} books...`, 'Starting import...');
 
     let successCount = 0;
     let failCount = 0;
+    let lastName = '';
 
     for (let i = 0; i < total; i++) {
       const file = validFiles[i];
       const cleanName = file.name.replace(/\.[^/.]+$/, '').trim();
+      lastName = cleanName;
       const bookId = 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
 
       App.showLoading(
         true,
-        `Adding books (${i + 1} of ${total})...`,
+        total === 1 ? 'Adding book...' : `Adding books (${i + 1} of ${total})...`,
         `Reading "${cleanName}"`
       );
 
@@ -343,7 +338,11 @@ const LibraryManager = (() => {
     App.showView('library');
 
     if (failCount === 0) {
-      App.showToast(`✅ Successfully added ${successCount} book${successCount !== 1 ? 's' : ''} to Library!`);
+      if (successCount === 1) {
+        App.showToast(`✅ "${lastName}" added to Library!`);
+      } else {
+        App.showToast(`✅ Successfully added ${successCount} books to Library!`);
+      }
     } else {
       App.showToast(`⚠️ Added ${successCount} book${successCount !== 1 ? 's' : ''} (${failCount} failed).`);
     }

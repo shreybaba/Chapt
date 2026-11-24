@@ -38,24 +38,6 @@
           </button>
         </div>
       </div>
-      <div class="d-right">
-        <button class="d-upload-btn d-upload-btn-secondary" onclick="App.triggerMultiUpload()" title="Add multiple PDF books at once">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-            <line x1="12" y1="6" x2="12" y2="12"/>
-            <line x1="9" y1="9" x2="15" y2="9"/>
-          </svg>
-          Add Multiple Books
-        </button>
-        <button class="d-upload-btn" onclick="App.triggerUpload()" title="Add a single PDF book">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add PDF
-        </button>
-      </div>
     </header>
 
     <div class="lib-body">
@@ -79,7 +61,7 @@
             <option value="progress">Progress (%)</option>
             <option value="pages">Total Pages</option>
           </select>
-          <button class="lib-add-btn" onclick="App.triggerMultiUpload()" title="Add multiple books">
+          <button class="lib-add-btn" onclick="App.triggerAddBooks()" title="Add PDF book(s)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -197,14 +179,6 @@
         </svg>
         Index
       </button>
-
-      <button class="nav-icon-btn" title="Add PDF to Library" onclick="App.triggerUpload()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        + PDF
-      </button>
     </nav>
 
     <!-- Reading Progress Line -->
@@ -291,9 +265,8 @@
   <!-- Toast Notification Pill -->
   <div class="toast" id="toast"></div>
 
-  <!-- Hidden File Inputs for Native File Picker -->
+  <!-- Hidden File Input for Native File Picker (Supports Single & Multiple Selection) -->
   <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display: none;"/>
-  <input type="file" id="fileInputMulti" accept="application/pdf,.pdf" multiple style="display: none;"/>
 
   <!-- Application Logic Scripts -->
   <script src="js/storage.js"></script>
