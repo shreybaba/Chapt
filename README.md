@@ -11,8 +11,8 @@ No cloud uploads. No external accounts. Just your documents, organized locally.
 ## Features
 
 ### Personal PDF Library
-- Add PDFs through file upload or drag and drop.
-- Manage your personal document collection.
+- Add single PDFs or batch import multiple books simultaneously.
+- Manage your personal document collection with progress tracking.
 - Store PDF files and metadata locally using IndexedDB.
 - No cloud storage or external account required.
 

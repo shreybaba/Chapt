@@ -92,6 +92,33 @@
   border-color: var(--bdr2);
 }
 
+.lib-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--g1);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  white-space: nowrap;
+}
+
+.lib-add-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.lib-add-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* Stats Bar */
 .lib-stats-bar {
   display: grid;
@@ -334,6 +361,15 @@
   color: var(--txt2);
   max-width: 340px;
   line-height: 1.5;
+}
+
+.empty-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {

@@ -73,13 +73,37 @@ const App = (() => {
     }
   }
 
+  function triggerMultiUpload() {
+    const inp = document.getElementById('fileInputMulti');
+    if (inp) {
+      inp.value = '';
+      inp.click();
+    }
+  }
+
   function setupFileUpload() {
     const inp = document.getElementById('fileInput');
     if (inp) {
       inp.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-          LibraryManager.handleFileUpload(file);
+        const files = e.target.files;
+        if (!files || !files.length) return;
+        if (files.length === 1) {
+          LibraryManager.handleFileUpload(files[0]);
+        } else {
+          LibraryManager.handleMultipleFiles(Array.from(files));
+        }
+      });
+    }
+
+    const inpMulti = document.getElementById('fileInputMulti');
+    if (inpMulti) {
+      inpMulti.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (!files || !files.length) return;
+        if (files.length === 1) {
+          LibraryManager.handleFileUpload(files[0]);
+        } else {
+          LibraryManager.handleMultipleFiles(Array.from(files));
         }
       });
     }
@@ -120,11 +144,17 @@ const App = (() => {
       e.preventDefault();
       const dt = e.dataTransfer;
       if (dt && dt.files && dt.files.length) {
-        const file = dt.files[0];
-        if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
-          LibraryManager.handleFileUpload(file);
+        const pdfFiles = Array.from(dt.files).filter(
+          (f) => f.name.toLowerCase().endsWith('.pdf') || f.type === 'application/pdf'
+        );
+        if (!pdfFiles.length) {
+          showToast('Please drop valid .pdf file(s).');
+          return;
+        }
+        if (pdfFiles.length === 1) {
+          LibraryManager.handleFileUpload(pdfFiles[0]);
         } else {
-          showToast('Please drop a valid .pdf file.');
+          LibraryManager.handleMultipleFiles(pdfFiles);
         }
       }
     });
@@ -135,7 +165,8 @@ const App = (() => {
     showView,
     showToast,
     showLoading,
-    triggerUpload
+    triggerUpload,
+    triggerMultiUpload
   };
 })();
 

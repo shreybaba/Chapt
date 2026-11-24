@@ -246,6 +246,7 @@ const ChaptersManager = (() => {
   return {
     extractText,
     detectChapters,
+    parseOutline,
     renderChList,
     filterCh,
     hlChapter,

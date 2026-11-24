@@ -96,7 +96,24 @@ const StorageManager = (() => {
   }
 
   function saveAllBooks(books) {
-    localStorage.setItem(META_KEY, JSON.stringify(books));
+    try {
+      localStorage.setItem(META_KEY, JSON.stringify(books));
+    } catch (e) {
+      console.warn('localStorage save warning (possibly quota exceeded):', e);
+      try {
+        const simplified = books.map((b) => ({
+          ...b,
+          chapters: (b.chapters || []).slice(0, 50).map((c) => ({
+            title: c.title,
+            page: c.page,
+            children: (c.children || []).slice(0, 3)
+          }))
+        }));
+        localStorage.setItem(META_KEY, JSON.stringify(simplified));
+      } catch (err2) {
+        console.error('localStorage quota exceeded:', err2);
+      }
+    }
   }
 
   function getBook(bookId) {

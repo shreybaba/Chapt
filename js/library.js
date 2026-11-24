@@ -43,10 +43,30 @@ const LibraryManager = (() => {
     // Check if Empty
     if (!books.length) {
       grid.innerHTML = `
-        <div class="empty-library" onclick="App.triggerUpload()" style="grid-column: 1 / -1;">
+        <div class="empty-library" style="grid-column: 1 / -1;">
           <div class="empty-icon">📚</div>
           <div class="empty-title">${searchQuery ? 'No matching books found' : 'Your Library is Empty'}</div>
-          <div class="empty-sub">${searchQuery ? 'Try another search term.' : 'Click here or "+ Add PDF" to add a book from your device.'}</div>
+          <div class="empty-sub">${searchQuery ? 'Try another search term.' : 'Click below to add a single PDF or import multiple books at once.'}</div>
+          ${searchQuery ? '' : `
+            <div class="empty-actions">
+              <button class="d-upload-btn d-upload-btn-secondary" onclick="App.triggerMultiUpload()" title="Add multiple books">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  <line x1="12" y1="6" x2="12" y2="12"/>
+                  <line x1="9" y1="9" x2="15" y2="9"/>
+                </svg>
+                Add Multiple Books
+              </button>
+              <button class="d-upload-btn" onclick="App.triggerUpload()" title="Add a single PDF book">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add PDF
+              </button>
+            </div>
+          `}
         </div>
       `;
       return;
@@ -185,7 +205,7 @@ const LibraryManager = (() => {
     }
 
     const cleanName = file.name.replace(/\.[^/.]+$/, '').trim();
-    const bookId = 'book_' + Date.now();
+    const bookId = 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
 
     App.showLoading(true, 'Reading PDF...', file.name);
 
@@ -240,6 +260,95 @@ const LibraryManager = (() => {
     }
   }
 
+  async function handleMultipleFiles(files) {
+    if (!files || !files.length) return;
+
+    const validFiles = Array.from(files).filter(
+      (f) => f.name.toLowerCase().endsWith('.pdf') || f.type === 'application/pdf'
+    );
+
+    if (!validFiles.length) {
+      App.showToast('Please select valid PDF files.');
+      return;
+    }
+
+    if (!window.pdfjsLib) {
+      App.showToast('⚠️ PDF parser library is still loading. Please try again.');
+      return;
+    }
+
+    const total = validFiles.length;
+    App.showLoading(true, `Adding ${total} books...`, 'Starting batch import...');
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < total; i++) {
+      const file = validFiles[i];
+      const cleanName = file.name.replace(/\.[^/.]+$/, '').trim();
+      const bookId = 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+
+      App.showLoading(
+        true,
+        `Adding books (${i + 1} of ${total})...`,
+        `Reading "${cleanName}"`
+      );
+
+      try {
+        const rawBuffer = await file.arrayBuffer();
+        await StorageManager.savePDF(bookId, rawBuffer.slice(0), file.name);
+
+        let totalPages = 1;
+        let chapters = [];
+
+        try {
+          const safeData = new Uint8Array(rawBuffer.slice(0));
+          const loadingTask = pdfjsLib.getDocument({ data: safeData });
+          const pdfDoc = await loadingTask.promise;
+          totalPages = pdfDoc.numPages || 1;
+
+          // Fast outline detection if available
+          try {
+            const ol = await pdfDoc.getOutline();
+            if (ol && ol.length >= 2 && ChaptersManager.parseOutline) {
+              chapters = await ChaptersManager.parseOutline(pdfDoc, ol);
+            }
+          } catch (eOutline) {
+            // Outline optional; full TOC detection runs on first read
+          }
+        } catch (pdfErr) {
+          console.warn(`Could not extract page count for ${file.name}:`, pdfErr);
+        }
+
+        const meta = {
+          id: bookId,
+          name: cleanName,
+          totalPages: totalPages,
+          currentPage: 1,
+          progress: 0,
+          chapters: chapters,
+          emoji: StorageManager.getBookEmoji(cleanName)
+        };
+
+        StorageManager.saveBook(meta);
+        successCount++;
+      } catch (err) {
+        console.error(`Error importing ${file.name}:`, err);
+        failCount++;
+      }
+    }
+
+    App.showLoading(false);
+    renderLibrary();
+    App.showView('library');
+
+    if (failCount === 0) {
+      App.showToast(`✅ Successfully added ${successCount} book${successCount !== 1 ? 's' : ''} to Library!`);
+    } else {
+      App.showToast(`⚠️ Added ${successCount} book${successCount !== 1 ? 's' : ''} (${failCount} failed).`);
+    }
+  }
+
   function confirmDelete(bookId, bookName) {
     pendingDeleteId = bookId;
     const nameEl = document.getElementById('delBookName');
@@ -271,6 +380,7 @@ const LibraryManager = (() => {
     applySort,
     openBook,
     handleFileUpload,
+    handleMultipleFiles,
     confirmDelete,
     executeDelete,
     closeDeleteModal

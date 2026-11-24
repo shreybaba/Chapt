@@ -110,6 +110,19 @@
   transform: translateY(-1px);
 }
 
+.d-upload-btn-secondary {
+  background: var(--s2);
+  border: 1px solid var(--bdr2);
+  color: var(--txt);
+  box-shadow: none;
+}
+
+.d-upload-btn-secondary:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--blue);
+  color: #fff;
+}
+
 .d-upload-btn svg {
   width: 14px;
   height: 14px;
