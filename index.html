@@ -1,279 +1,402 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chapt</title>
-  
-  <!-- PDF.js Core Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapt</title>
 
-  <!-- Modular Stylesheet -->
-  <link rel="stylesheet" href="css/style.css"/>
-  <link rel="icon" type="image/png" href="icon-192.png"/>
-</head>
-<body>
+    <!-- PDF.js Core Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-  <!-- ═══════════════════════════════════════════════════════════════
+    <!-- Modular Stylesheet -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/png" href="icon-192.png" />
+  </head>
+  <body>
+    <!-- ═══════════════════════════════════════════════════════════════
        1. LIBRARY VIEW
        ═══════════════════════════════════════════════════════════════ -->
-  <main id="libView" class="view">
-    <!-- Top Navigation Bar -->
-    <header class="dnav">
-      <div class="d-left">
-        <div class="d-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
+    <main id="libView" class="view">
+      <!-- Top Navigation Bar -->
+      <header class="dnav">
+        <div class="d-left">
+          <div class="d-logo">
+            <img src="assets/chapt-logo.png" alt="CHAPT Logo" />
+          </div>
+          <span class="d-brand">Cha<span class="brand-accent">Pt</span></span>
+          <div class="nav-tabs">
+            <button class="nav-tab active" onclick="App.showView('library')">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+              Library
+            </button>
+          </div>
         </div>
-        <span class="d-brand">Read<span>PDF</span></span>
-        <div class="nav-tabs">
-          <button class="nav-tab active" onclick="App.showView('library')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
-            Library
-          </button>
+      </header>
+
+      <div class="lib-body">
+        <!-- Library Header -->
+        <div class="lib-header fu">
+          <div class="lib-header-left">
+            <h2>My Library</h2>
+            <p id="libSubtitle">Your reading collection</p>
+          </div>
+          <div class="lib-controls">
+            <div class="lib-search">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="libSearchInp"
+                placeholder="Search books..."
+              />
+            </div>
+            <select id="libSortSelect" class="lib-select">
+              <option value="recent">Recently Read</option>
+              <option value="name">Title (A-Z)</option>
+              <option value="progress">Progress (%)</option>
+              <option value="pages">Total Pages</option>
+            </select>
+            <button
+              class="lib-add-btn"
+              onclick="App.triggerAddBooks()"
+              title="Add PDF book(s)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path
+                  d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                />
+                <line x1="12" y1="6" x2="12" y2="12" />
+                <line x1="9" y1="9" x2="15" y2="9" />
+              </svg>
+              Add Books
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="lib-stats-bar fu">
+          <div class="lsb">
+            <div
+              class="lsb-icon"
+              style="background: rgba(59, 130, 246, 0.12); color: var(--blue)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+            </div>
+            <div>
+              <div class="lsb-val" id="statTotal">0</div>
+              <div class="lsb-lbl">Books saved</div>
+            </div>
+          </div>
+
+          <div class="lsb">
+            <div
+              class="lsb-icon"
+              style="background: rgba(14, 165, 233, 0.12); color: var(--cyan)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div>
+              <div class="lsb-val" id="statPages">0</div>
+              <div class="lsb-lbl">Pages indexed</div>
+            </div>
+          </div>
+
+          <div class="lsb">
+            <div
+              class="lsb-icon"
+              style="background: rgba(16, 185, 129, 0.12); color: var(--green)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
+            <div>
+              <div class="lsb-val" id="statDone">0</div>
+              <div class="lsb-lbl">Completed books</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Book Grid Container -->
+        <div id="bookGrid" class="book-grid fu">
+          <!-- Rendered dynamically by LibraryManager -->
         </div>
       </div>
-    </header>
+    </main>
 
-    <div class="lib-body">
-      <!-- Library Header -->
-      <div class="lib-header fu">
-        <div class="lib-header-left">
-          <h2>My Library</h2>
-          <p id="libSubtitle">Your reading collection</p>
-        </div>
-        <div class="lib-controls">
-          <div class="lib-search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" id="libSearchInp" placeholder="Search books..."/>
-          </div>
-          <select id="libSortSelect" class="lib-select">
-            <option value="recent">Recently Read</option>
-            <option value="name">Title (A-Z)</option>
-            <option value="progress">Progress (%)</option>
-            <option value="pages">Total Pages</option>
-          </select>
-          <button class="lib-add-btn" onclick="App.triggerAddBooks()" title="Add PDF book(s)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              <line x1="12" y1="6" x2="12" y2="12"/>
-              <line x1="9" y1="9" x2="15" y2="9"/>
-            </svg>
-            Add Books
-          </button>
-        </div>
-      </div>
-
-      <!-- Stats Bar -->
-      <div class="lib-stats-bar fu">
-        <div class="lsb">
-          <div class="lsb-icon" style="background: rgba(59,130,246,0.12); color: var(--blue);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
-          </div>
-          <div>
-            <div class="lsb-val" id="statTotal">0</div>
-            <div class="lsb-lbl">Books saved</div>
-          </div>
-        </div>
-
-        <div class="lsb">
-          <div class="lsb-icon" style="background: rgba(14,165,233,0.12); color: var(--cyan);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
-          </div>
-          <div>
-            <div class="lsb-val" id="statPages">0</div>
-            <div class="lsb-lbl">Pages indexed</div>
-          </div>
-        </div>
-
-        <div class="lsb">
-          <div class="lsb-icon" style="background: rgba(16,185,129,0.12); color: var(--green);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-          </div>
-          <div>
-            <div class="lsb-val" id="statDone">0</div>
-            <div class="lsb-lbl">Completed books</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Book Grid Container -->
-      <div id="bookGrid" class="book-grid fu">
-        <!-- Rendered dynamically by LibraryManager -->
-      </div>
-    </div>
-  </main>
-
-  <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════════════════════
        2. READER VIEW
        ═══════════════════════════════════════════════════════════════ -->
-  <section id="readerView" class="view off">
-    <!-- Reader Top Bar -->
-    <nav class="rnav">
-      <button class="back-btn" onclick="App.showView('library')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-        Library
-      </button>
-
-      <span class="r-file" id="rFileName">Document</span>
-      <span class="r-badge" id="rBadge"></span>
-
-      <!-- Page Counter Pill -->
-      <div class="page-counter-pill" id="pageCounter">
-        <span class="pcp-label">Page</span>
-        <span class="pcp-num" id="pcpNum">1</span>
-        <span class="pcp-sep">/</span>
-        <span class="pcp-total" id="pcpTotal">1</span>
-      </div>
-
-      <!-- Zoom Controls -->
-      <div class="zoom-ctl">
-        <button title="Zoom Out" onclick="ReaderManager.changeZoom(-0.15)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <section id="readerView" class="view off">
+      <!-- Reader Top Bar -->
+      <nav class="rnav">
+        <button class="back-btn" onclick="App.showView('library')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Library
         </button>
-        <span class="zoom-val" id="zoomVal">100%</span>
-        <button title="Zoom In" onclick="ReaderManager.changeZoom(0.15)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-      </div>
 
-      <!-- View Toggles -->
-      <button id="btnToggleThumbs" class="nav-icon-btn active" title="Toggle Thumbnails" onclick="ReaderManager.toggleThumbs()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"/>
-          <rect x="3" y="14" width="7" height="7"/>
-          <line x1="14" y1="4" x2="21" y2="4"/>
-          <line x1="14" y1="15" x2="21" y2="15"/>
-        </svg>
-        Thumbs
-      </button>
+        <span class="r-file" id="rFileName">Document</span>
+        <span class="r-badge" id="rBadge"></span>
 
-      <button id="btnToggleChapters" class="nav-icon-btn active" title="Toggle Chapters Sidebar" onclick="ReaderManager.toggleChapters()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="8" y1="6" x2="21" y2="6"/>
-          <line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3.01" y2="6"/>
-          <line x1="3" y1="12" x2="3.01" y2="12"/>
-          <line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-        Index
-      </button>
-    </nav>
+        <!-- Page Counter Pill -->
+        <div class="page-counter-pill" id="pageCounter">
+          <span class="pcp-label">Page</span>
+          <span class="pcp-num" id="pcpNum">1</span>
+          <span class="pcp-sep">/</span>
+          <span class="pcp-total" id="pcpTotal">1</span>
+        </div>
 
-    <!-- Reading Progress Line -->
-    <div class="r-prog">
-      <div class="r-pfill" id="rPfill"></div>
-    </div>
-
-    <!-- Main Reader Workspace -->
-    <div class="r-main">
-      <!-- Thumbnail Strip (Left) -->
-      <div class="thumb-strip" id="thumbStrip"></div>
-
-      <!-- Scrollable PDF Canvas Viewer (Center) -->
-      <div class="pdf-viewer" id="pdfViewer">
-        <div class="pdf-pages" id="pdfPages"></div>
-      </div>
-
-      <!-- Untouched Chapters & Index Sidebar (Right) -->
-      <aside class="ch-sidebar" id="chSidebar">
-        <div class="csh-head">
-          <div class="csh-row">
-            <div class="csh-title-group">
-              <h3>Chapters &amp; Index</h3>
-              <span class="src-tag" id="srcTag"></span>
-            </div>
-            <span class="ch-cnt" id="chCnt">0 found</span>
-          </div>
-          <div class="csh-search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <!-- Zoom Controls -->
+        <div class="zoom-ctl">
+          <button title="Zoom Out" onclick="ReaderManager.changeZoom(-0.15)">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            <input type="text" id="chSearchInp" placeholder="Search chapters..."/>
-          </div>
+          </button>
+          <span class="zoom-val" id="zoomVal">100%</span>
+          <button title="Zoom In" onclick="ReaderManager.changeZoom(0.15)">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
         </div>
 
-        <div class="ch-scroll" id="chScroll">
-          <!-- Rendered dynamically by ChaptersManager -->
+        <!-- View Toggles -->
+        <button
+          id="btnToggleThumbs"
+          class="nav-icon-btn active"
+          title="Toggle Thumbnails"
+          onclick="ReaderManager.toggleThumbs()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <line x1="14" y1="4" x2="21" y2="4" />
+            <line x1="14" y1="15" x2="21" y2="15" />
+          </svg>
+          Thumbs
+        </button>
+
+        <button
+          id="btnToggleChapters"
+          class="nav-icon-btn active"
+          title="Toggle Chapters Sidebar"
+          onclick="ReaderManager.toggleChapters()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+          Index
+        </button>
+      </nav>
+
+      <!-- Reading Progress Line -->
+      <div class="r-prog">
+        <div class="r-pfill" id="rPfill"></div>
+      </div>
+
+      <!-- Main Reader Workspace -->
+      <div class="r-main">
+        <!-- Thumbnail Strip (Left) -->
+        <div class="thumb-strip" id="thumbStrip"></div>
+
+        <!-- Scrollable PDF Canvas Viewer (Center) -->
+        <div class="pdf-viewer" id="pdfViewer">
+          <div class="pdf-pages" id="pdfPages"></div>
         </div>
 
-        <div class="csh-foot">
-          <div class="csh-prog-row">
-            <div class="csh-prog-info">
-              <div class="csh-cur-ch" id="cshCurCh">Chapter 1</div>
+        <!-- Untouched Chapters & Index Sidebar (Right) -->
+        <aside class="ch-sidebar" id="chSidebar">
+          <div class="csh-head">
+            <div class="csh-row">
+              <div class="csh-title-group">
+                <h3>Chapters &amp; Index</h3>
+                <span class="src-tag" id="srcTag"></span>
+              </div>
+              <span class="ch-cnt" id="chCnt">0 found</span>
             </div>
-            <div class="csh-prog-pct" id="cshProgPct">0%</div>
+            <div class="csh-search">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="chSearchInp"
+                placeholder="Search chapters..."
+              />
+            </div>
           </div>
-          <div class="csh-bar">
-            <div class="csh-bar-fill" id="cshBarFill"></div>
-          </div>
-        </div>
-      </aside>
-    </div>
-  </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════
+          <div class="ch-scroll" id="chScroll">
+            <!-- Rendered dynamically by ChaptersManager -->
+          </div>
+
+          <div class="csh-foot">
+            <div class="csh-prog-row">
+              <div class="csh-prog-info">
+                <div class="csh-cur-ch" id="cshCurCh">Chapter 1</div>
+              </div>
+              <div class="csh-prog-pct" id="cshProgPct">0%</div>
+            </div>
+            <div class="csh-bar">
+              <div class="csh-bar-fill" id="cshBarFill"></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
        3. MODALS, TOASTS & HIDDEN CONTROLS
        ═══════════════════════════════════════════════════════════════ -->
-  <!-- Delete Book Confirmation Modal -->
-  <div class="del-modal-ov off" id="delOv" onclick="if(event.target===this) LibraryManager.closeDeleteModal()">
-    <div class="del-modal">
-      <div class="del-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-        </svg>
-      </div>
-      <h4>Delete Book?</h4>
-      <p>Remove <strong id="delBookName" style="color:var(--txt)">this book</strong> from your local library? This cannot be undone.</p>
-      <div class="del-btns">
-        <button class="del-cancel" onclick="LibraryManager.closeDeleteModal()">Cancel</button>
-        <button class="del-confirm" onclick="LibraryManager.executeDelete()">Delete</button>
+    <!-- Delete Book Confirmation Modal -->
+    <div
+      class="del-modal-ov off"
+      id="delOv"
+      onclick="if (event.target === this) LibraryManager.closeDeleteModal();"
+    >
+      <div class="del-modal">
+        <div class="del-icon">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+          </svg>
+        </div>
+        <h4>Delete Book?</h4>
+        <p>
+          Remove
+          <strong id="delBookName" style="color: var(--txt)">this book</strong>
+          from your local library? This cannot be undone.
+        </p>
+        <div class="del-btns">
+          <button
+            class="del-cancel"
+            onclick="LibraryManager.closeDeleteModal()"
+          >
+            Cancel
+          </button>
+          <button class="del-confirm" onclick="LibraryManager.executeDelete()">
+            Delete
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Loading Overlay -->
-  <div class="load-ov" id="loadOv">
-    <div class="spinner"></div>
-    <div id="loadMsg" style="font-weight:700; color:var(--txt)">Loading PDF...</div>
-    <div id="loadSub" class="load-sub">Please wait</div>
-  </div>
+    <!-- Loading Overlay -->
+    <div class="load-ov" id="loadOv">
+      <div class="spinner"></div>
+      <div id="loadMsg" style="font-weight: 700; color: var(--txt)">
+        Loading PDF...
+      </div>
+      <div id="loadSub" class="load-sub">Please wait</div>
+    </div>
 
-  <!-- Toast Notification Pill -->
-  <div class="toast" id="toast"></div>
+    <!-- Toast Notification Pill -->
+    <div class="toast" id="toast"></div>
 
-  <!-- Hidden File Input for Native File Picker (Supports Single & Multiple Selection) -->
-  <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display: none;"/>
+    <!-- Hidden File Input for Native File Picker (Supports Single & Multiple Selection) -->
+    <input
+      type="file"
+      id="fileInput"
+      accept="application/pdf,.pdf"
+      multiple
+      style="display: none"
+    />
 
-  <!-- Application Logic Scripts -->
-  <script src="js/storage.js"></script>
-  <script src="js/chapters.js"></script>
-  <script src="js/reader.js"></script>
-  <script src="js/library.js"></script>
-  <script src="js/app.js"></script>
-
-</body>
+    <!-- Application Logic Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/chapters.js"></script>
+    <script src="js/reader.js"></script>
+    <script src="js/library.js"></script>
+    <script src="js/app.js"></script>
+  </body>
 </html>
