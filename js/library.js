@@ -160,15 +160,17 @@ const LibraryManager = (() => {
       await ReaderManager.loadPDF(buffer.slice(0), meta);
 
       // Check Chapters
-      if (meta.chapters && meta.chapters.length) {
+      const hasSubtopics = (meta.chapters || []).some((c) => c.children && c.children.length > 0);
+      if (meta.chapters && meta.chapters.length && (hasSubtopics || meta.indexVersion === 2)) {
         ChaptersManager.setChapters(meta.chapters);
         ChaptersManager.setBadge('outline', '● Stored Index');
       } else {
-        App.showLoading(true, 'Extracting chapters...', 'Scanning table of contents');
+        App.showLoading(true, 'Extracting chapters...', 'Scanning table of contents & sub-topics');
         const pdfDoc = ReaderManager.getPdfDoc();
-        await ChaptersManager.extractText(pdfDoc);
+        await ChaptersManager.extractText(pdfDoc, 30);
         const chs = await ChaptersManager.detectChapters(pdfDoc, ReaderManager.getTotalPages());
         meta.chapters = chs;
+        meta.indexVersion = 2;
         StorageManager.saveBook(meta);
         ChaptersManager.setChapters(chs);
       }
@@ -232,11 +234,12 @@ const LibraryManager = (() => {
       const totalPages = ReaderManager.getTotalPages();
       meta.totalPages = totalPages;
 
-      // 6. Extract chapters using untouched extraction engine
+      // 6. Extract chapters using extraction engine
       App.showLoading(true, 'Extracting chapters & index...', 'Analyzing document structure');
-      await ChaptersManager.extractText(pdfDoc);
+      await ChaptersManager.extractText(pdfDoc, 30);
       const chapters = await ChaptersManager.detectChapters(pdfDoc, totalPages);
       meta.chapters = chapters;
+      meta.indexVersion = 2;
 
       // 7. Save metadata and render chapters
       StorageManager.saveBook(meta);

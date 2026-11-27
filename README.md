@@ -1,47 +1,66 @@
-# CHAPT
+# <img src="assets/chapt-logo.png" width="48" align="center" alt="CHAPT Logo"> CHAPT
 
 ### Read. Navigate. Understand.
 
-**CHAPT** is a smart, browser-based PDF reader designed to make navigating long documents easier. It automatically extracts chapters and subtopics from PDF files, turning lengthy documents into structured, searchable reading experiences.
+**CHAPT** is a smart, installable PDF reader designed to make navigating lengthy documents easier. It automatically extracts chapters and subtopics from PDF files, transforming lengthy documents into structured, searchable reading experiences.
 
-No cloud uploads. No external accounts. Just your documents, organized locally.
+Built with a local-first approach, CHAPT stores your documents and reading progress directly on your device using IndexedDB.
+
+**Add a book once, and read it anytime. No internet connection is required to reopen and read previously added books, provided the application has been loaded and its required resources are available offline.**
 
 ---
 
 ## Features
 
 ### Personal PDF Library
-- Add single PDFs or batch import multiple books simultaneously.
-- Manage your personal document collection with progress tracking.
+
+- Add individual PDFs or batch import multiple books.
+- Manage your personal document collection with reading progress tracking.
 - Store PDF files and metadata locally using IndexedDB.
+- Access previously imported documents without repeatedly downloading them.
 - No cloud storage or external account required.
 
 ### Automatic Chapter and Subtopic Extraction
 
 CHAPT uses a multi-stage extraction engine to identify document structure:
 
-- **PDF Outline Detection:** Extracts native bookmarks and document outlines.
-- **Table of Contents Scanning:** Analyzes TOC pages, including dotted page references.
-- **Regex-Based Heading Detection:** Identifies chapter titles, parts, and numbered sections across document pages.
+- **PDF Outline Detection:** Extracts native bookmarks and document outlines, including documents whose outlines contain only top-level chapters.
+- **Table of Contents Scanning:** Detects subtopics from TOC entries and matches them to their parent chapters.
+- **Regex-Based Heading Detection:** Falls back to scanning document pages for numbered sub-headings when subtopics are not available from the outline or TOC.
+- **Hierarchical Organization:** Groups numbered sections under their corresponding parent chapters instead of displaying them as separate top-level entries.
 
 The extracted hierarchy makes it easier to explore lengthy books, notes, manuals, and academic documents.
 
 ### Smart Chapter Navigation
+
 - Browse extracted chapters and subtopics.
 - Instantly search and filter the document structure.
 - Jump directly to selected chapters or sections.
-- Highlight the current chapter automatically while reading.
+- Automatically highlight the current chapter while reading.
 
 ### Reading Progress Tracking
+
 - Automatically remembers your last-read page.
 - Tracks reading progress for individual PDFs.
 - Resume reading from where you left off.
+- Maintains reading information locally.
 
 ### Enhanced Reading Experience
+
 - Page thumbnail sidebar for quick navigation.
 - Adjustable zoom controls from 50% to 250%.
 - PDF rendering powered by PDF.js.
 - Dedicated reading interface with chapter navigation.
+
+### Progressive Web App (PWA)
+
+CHAPT can be installed as a Progressive Web App through supported browsers.
+
+- Install CHAPT directly on your desktop.
+- Launch it in a standalone application window.
+- Custom application name, icons, and theme.
+- Service Worker-based application resource caching.
+- Offline access to previously imported books when the application resources are available locally.
 
 ---
 
@@ -49,7 +68,7 @@ The extracted hierarchy makes it easier to explore lengthy books, notes, manuals
 
 CHAPT follows a simple document-processing workflow:
 
-1. **Import:** Add a PDF to your local library.
+1. **Import:** Add a PDF to your personal library.
 2. **Analyze:** The extraction engine examines bookmarks, TOC pages, and heading patterns.
 3. **Organize:** Detected chapters and subtopics are converted into a navigable hierarchy.
 4. **Read:** Open the document and navigate through its structure.
@@ -57,48 +76,75 @@ CHAPT follows a simple document-processing workflow:
 
 ---
 
+## Offline Functionality
+
+CHAPT follows a local-first architecture.
+
+Once a book has been imported, its PDF file and associated information are stored in IndexedDB on your device.
+
+This means:
+
+- Previously imported books can be reopened without downloading them again.
+- Reading progress remains stored locally.
+- Chapter navigation and document processing work without requiring cloud services.
+- You can continue reading without an active internet connection, provided CHAPT's application resources and PDF.js are available offline.
+
+**Your books stay on your device, ready whenever you want to read.**
+
+---
+
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Application structure |
-| CSS3 | Styling and responsive interface |
-| JavaScript | Application logic and functionality |
-| PDF.js | PDF rendering and document processing |
-| IndexedDB | Local PDF and metadata storage |
+| Technology       | Purpose                                          |
+| ---------------- | ------------------------------------------------ |
+| HTML5            | Application structure                            |
+| CSS3             | Styling and responsive interface                 |
+| JavaScript       | Application logic and functionality              |
+| PDF.js           | PDF rendering and document processing            |
+| IndexedDB        | Local PDF and metadata storage                   |
+| Service Worker   | Application resource caching and offline support |
+| Web App Manifest | PWA identity and installation configuration      |
 
 ---
 
 ## Project Structure
 
 ```text
-project-pdf/
+Chapt/
 │
-├── index.html
+├── assets/
+│   └── chapt-logo.png
 │
 ├── css/
-│   ├── style.css
 │   ├── base/
-│   │   ├── variables.css
-│   │   └── reset.css
+│   │   ├── reset.css
+│   │   └── variables.css
+│   │
 │   ├── components/
-│   │   ├── nav.css
-│   │   └── modals.css
-│   └── views/
-│       ├── library.css
-│       ├── reader.css
-│       └── chapters.css
+│   │   ├── modals.css
+│   │   └── nav.css
+│   │
+│   ├── views/
+│   │   ├── chapters.css
+│   │   ├── library.css
+│   │   └── reader.css
+│   │
+│   └── style.css
 │
 ├── js/
-│   ├── storage.js
+│   ├── app.js
 │   ├── chapters.js
-│   ├── reader.js
 │   ├── library.js
-│   └── app.js
+│   ├── reader.js
+│   └── storage.js
 │
+├── .gitignore
 ├── icon-192.png
-├── icon-512.png
-└── LICENSE
+├── index.html
+├── LICENSE
+├── manifest.json
+├── README.md
+└── sw.js
 ```
 
 ---
@@ -106,24 +152,26 @@ project-pdf/
 ## Getting Started
 
 ### Prerequisites
+
 - A modern web browser.
-- Node.js (optional, for using a local development server).
+- Python or Node.js for running a local development server.
+- An internet connection for the initial application load and externally hosted resources.
 
 ### Installation
 
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/shreybaba/project-pdf-.git
+git clone https://github.com/shreybaba/Chapt.git
 ```
 
 **2. Navigate to the project directory**
 
 ```bash
-cd project-pdf-
+cd Chapt
 ```
 
-**3. Start a local server**
+**3. Start a local development server**
 
 Using Python:
 
@@ -131,7 +179,7 @@ Using Python:
 python -m http.server 3000
 ```
 
-Or using Node.js:
+Alternatively, using Node.js:
 
 ```bash
 npx serve .
@@ -145,26 +193,31 @@ Visit:
 http://localhost:3000
 ```
 
-You can also open `index.html` directly in a compatible browser, although using a local server is recommended for consistent behavior.
+A local server is recommended for proper Service Worker and PWA functionality.
 
-### Using CHAPT
+---
 
-1. Open the application.
-2. Click **+ Add PDF** or drag and drop a PDF into the library.
-3. Let CHAPT analyze the document and extract its chapter hierarchy.
-4. Select a chapter or subtopic to navigate directly to it.
-5. Continue reading with your progress saved locally.
+## Installing CHAPT
+
+CHAPT can be installed as a desktop application through supported browsers.
+
+1. Open the deployed CHAPT website.
+2. Locate the browser's Install option.
+3. Select Install CHAPT.
+4. Launch CHAPT from your desktop or application launcher.
+
+CHAPT opens in a standalone application window, providing an application-like reading experience.
 
 ---
 
 ## Privacy First
 
-CHAPT follows a local-first approach.
+CHAPT is designed around local document storage and user privacy.
 
-- PDF files are stored in your browser using IndexedDB.
-- Reading progress and document metadata are maintained locally.
-- Documents do not need to be uploaded to a cloud service.
-- No external account is required.
+- PDF files are stored locally using IndexedDB.
+- Reading progress and document metadata are maintained on the device.
+- Documents are not uploaded to a cloud server.
+- No external account or registration is required.
 
 **Your documents stay in your browser's local storage.**
 

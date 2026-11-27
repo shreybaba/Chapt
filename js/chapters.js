@@ -20,21 +20,55 @@ const ChaptersManager = (() => {
       .replace(/"/g, '&quot;');
   }
 
-  // --- Untouched Index & Text Extraction ---
-  async function extractText(pdfDoc) {
+  async function getPageLines(pg) {
+    const tc = await pg.getTextContent();
+    const linesMap = new Map();
+    for (const it of tc.items) {
+      if (!it.str) continue;
+      const x = it.transform[4];
+      const y = Math.round(it.transform[5] / 2) * 2;
+      if (!linesMap.has(y)) linesMap.set(y, []);
+      linesMap.get(y).push({ x, w: it.width || 0, str: it.str });
+    }
+    const sortedYs = Array.from(linesMap.keys()).sort((a, b) => b - a);
+    const lines = [];
+    for (const y of sortedYs) {
+      const items = linesMap.get(y).sort((a, b) => a.x - b.x);
+      let line = '';
+      let prevEnd = null;
+      for (const item of items) {
+        if (!item.str.trim()) {
+          if (line && !line.endsWith(' ')) line += ' ';
+          if (prevEnd === null) prevEnd = item.x + item.w;
+          else prevEnd = Math.max(prevEnd, item.x + item.w);
+          continue;
+        }
+        if (prevEnd !== null) {
+          const gap = item.x - prevEnd;
+          if (gap > 14) {
+            line += '   ';
+          } else if (gap > 2 && !line.endsWith(' ') && !item.str.startsWith(' ')) {
+            line += ' ';
+          }
+        }
+        line += item.str;
+        prevEnd = item.x + item.w;
+      }
+      const trimmed = line.trim();
+      if (trimmed) lines.push(trimmed);
+    }
+    return lines.join('\n');
+  }
+
+  // --- Index & Text Extraction ---
+  async function extractText(pdfDoc, maxLimit = 100) {
     pageTexts = [];
-    const maxPages = Math.min(pdfDoc.numPages, 100);
+    const maxPages = Math.min(pdfDoc.numPages, maxLimit);
     for (let i = 1; i <= maxPages; i++) {
       try {
         const pg = await pdfDoc.getPage(i);
-        const tc = await pg.getTextContent();
-        const lm = {};
-        for (const it of tc.items) {
-          if (!it.str || !it.str.trim()) continue;
-          const y = Math.round(it.transform[5]);
-          lm[y] = (lm[y] || '') + it.str;
-        }
-        pageTexts.push({ page: i, text: Object.values(lm).join('\n') });
+        const text = await getPageLines(pg);
+        pageTexts.push({ page: i, text });
       } catch (err) {
         console.warn(`Text extraction error on page ${i}:`, err);
       }
@@ -42,7 +76,11 @@ const ChaptersManager = (() => {
     return pageTexts;
   }
 
-  // --- Untouched Chapter Detection ---
+  function hasAnyChildren(chapters) {
+    return Array.isArray(chapters) && chapters.some((c) => c.children && c.children.length > 0);
+  }
+
+  // --- Chapter Detection ---
   async function detectChapters(pdfDoc, totalPages) {
     // 1. Try Built-in Outline
     try {
@@ -50,6 +88,10 @@ const ChaptersManager = (() => {
       if (ol && ol.length >= 2) {
         const r = await parseOutline(pdfDoc, ol);
         if (r && r.length >= 2) {
+          // If outline has no sub-topics, enrich from TOC or page headings
+          if (!hasAnyChildren(r)) {
+            await enrichWithSubtopics(pdfDoc, r, totalPages);
+          }
           setBadge('outline', '● Built-in');
           allChapters = r;
           currentChapters = [...r];
@@ -101,7 +143,7 @@ const ChaptersManager = (() => {
       } catch (e) {}
 
       const children = [];
-      for (const sub of (item.items || []).slice(0, 5)) {
+      for (const sub of (item.items || [])) {
         let sp = pn;
         try {
           let d = sub.dest;
@@ -115,10 +157,176 @@ const ChaptersManager = (() => {
     return res;
   }
 
+  function parseTOCLines(pagesSubset, totalPages) {
+    const gapRe = /^(.{2,90}?)\s*(?:\.{2,}|\s{2,})\s*(\d{1,4})$/;
+    const numberedRe = /^(\d{1,2}\.\d{1,2}(?:\.\d{1,2})?\s+.{2,80}?)\s+(\d{1,4})$/;
+    const entries = [];
+    for (const pt of pagesSubset) {
+      const lines = pt.text.split('\n');
+      for (const ln of lines) {
+        const t = ln.trim();
+        const m = t.match(gapRe) || t.match(numberedRe);
+        if (m) {
+          const title = m[1].trim();
+          const pg = parseInt(m[2], 10);
+          if (title.length > 2 && pg > 0 && pg <= totalPages) {
+            entries.push({ title, page: pg });
+          }
+        }
+      }
+    }
+    return entries;
+  }
+
+  function normalizeTitle(s) {
+    return (s || '')
+      .toLowerCase()
+      .replace(/^(chapter|part)\s+/i, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function extractChapterNumber(title) {
+    const m = (title || '').trim().match(/^(?:chapter\s+)?(\d{1,3})\b/i);
+    return m ? m[1] : null;
+  }
+
+  function extractSubNumber(title) {
+    const m = (title || '').trim().match(/^(\d{1,3})\.\d+(?:\.\d+)*/);
+    return m ? m[1] : null;
+  }
+
+  async function enrichWithSubtopics(pdfDoc, chapters, totalPages) {
+    if (!pageTexts.length && pdfDoc) {
+      await extractText(pdfDoc, 30);
+    }
+
+    // 1. Try extracting sub-topics from TOC pages (first 30 pages)
+    const tocEntries = parseTOCLines(pageTexts.slice(0, 30), totalPages);
+    if (tocEntries.length >= 4) {
+      // Estimate page offset between printed TOC pages and PDF pages
+      let offset = 0;
+      const offsets = [];
+      for (const ch of chapters) {
+        const chNorm = normalizeTitle(ch.title);
+        const match = tocEntries.find((e) => {
+          const eNorm = normalizeTitle(e.title);
+          return eNorm === chNorm || (chNorm.length > 5 && eNorm.includes(chNorm));
+        });
+        if (match) {
+          offsets.push(ch.page - match.page);
+        }
+      }
+      if (offsets.length > 0) {
+        offsets.sort((a, b) => a - b);
+        offset = offsets[Math.floor(offsets.length / 2)];
+      }
+
+      // Attach non-chapter TOC entries as sub-topics
+      const chNormSet = new Set(chapters.map((c) => normalizeTitle(c.title)));
+      for (const entry of tocEntries) {
+        const eNorm = normalizeTitle(entry.title);
+        if (chNormSet.has(eNorm)) continue;
+
+        const pdfPage = Math.max(1, Math.min(totalPages, entry.page + offset));
+        const subNum = extractSubNumber(entry.title);
+
+        let targetCh = null;
+        if (subNum) {
+          targetCh = chapters.find((c) => extractChapterNumber(c.title) === subNum);
+        }
+        if (!targetCh) {
+          for (let i = 0; i < chapters.length; i++) {
+            const startPg = chapters[i].page;
+            const endPg = i + 1 < chapters.length ? chapters[i + 1].page : totalPages + 1;
+            if (pdfPage >= startPg && pdfPage < endPg) {
+              targetCh = chapters[i];
+              break;
+            }
+          }
+        }
+
+        if (targetCh) {
+          if (!targetCh.children) targetCh.children = [];
+          if (!targetCh.children.some((s) => s.title === entry.title && s.page === pdfPage)) {
+            targetCh.children.push({ title: entry.title, page: pdfPage });
+          }
+        }
+      }
+
+      if (hasAnyChildren(chapters)) return;
+    }
+
+    // 2. Fallback: scan document pages for numbered sub-headings (e.g. "1.1 Overview")
+    if (!pdfDoc) return;
+    const subRe = /^(\d{1,2}\.\d{1,2}(?:\.\d{1,2})?)\s+([A-Za-z][^\n]{2,90})$/;
+    const seen = new Set();
+    const scanLimit = Math.min(totalPages, 600);
+
+    for (let p = 1; p <= scanLimit; p++) {
+      let text = '';
+      const cached = pageTexts.find((pt) => pt.page === p);
+      if (cached) {
+        text = cached.text;
+      } else {
+        try {
+          const pg = await pdfDoc.getPage(p);
+          text = await getPageLines(pg);
+        } catch (e) {
+          continue;
+        }
+      }
+
+      for (const ln of text.split('\n')) {
+        const t = ln.trim();
+        const m = t.match(subRe);
+        if (!m) continue;
+        const parentNum = m[1].split('.')[0];
+        let targetCh = chapters.find((c) => extractChapterNumber(c.title) === parentNum);
+        if (!targetCh) {
+          for (let i = 0; i < chapters.length; i++) {
+            const startPg = chapters[i].page;
+            const endPg = i + 1 < chapters.length ? chapters[i + 1].page : totalPages + 1;
+            if (p >= startPg && p < endPg) {
+              targetCh = chapters[i];
+              break;
+            }
+          }
+        }
+        if (targetCh) {
+          const key = `${targetCh.title}|${t}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            if (!targetCh.children) targetCh.children = [];
+            targetCh.children.push({ title: t, page: p });
+          }
+        }
+      }
+    }
+  }
+
+  function groupSubEntries(flatList) {
+    const chapters = [];
+    const subRe = /^(\d{1,3})\.\d+/;
+    for (const item of flatList) {
+      const m = item.title.trim().match(subRe);
+      if (m && chapters.length > 0) {
+        const parentNum = m[1];
+        const parent =
+          chapters.find((c) => extractChapterNumber(c.title) === parentNum) ||
+          chapters[chapters.length - 1];
+        parent.children.push({ title: item.title, page: item.page });
+      } else {
+        chapters.push({ title: item.title, page: item.page, children: [] });
+      }
+    }
+    return chapters;
+  }
+
   function scanTOC(totalPages) {
     const re = /(.{3,60})\s+\.{2,}\s*(\d+)$|(.{3,60})\s{3,}(\d+)$/;
     const found = [];
-    for (const pt of pageTexts.slice(0, 20)) {
+    for (const pt of pageTexts.slice(0, 25)) {
       const lines = pt.text.split('\n');
       let cnt = 0;
       for (const ln of lines) {
@@ -132,13 +340,13 @@ const ChaptersManager = (() => {
           }
         }
       }
-      if (cnt >= 4) return found;
+      if (cnt >= 4) return groupSubEntries(found);
     }
     return [];
   }
 
   function regexScan() {
-    const re = /^(chapter\s+[\divxlcIVXLC]+|part\s+[\divxlcIVXLC]+|\d{1,2}[\.\:]\s+[A-Z])/i;
+    const re = /^(chapter\s+[\divxlcIVXLC]+|part\s+[\divxlcIVXLC]+|\d{1,2}(?:\.\d{1,2})?[\.\:\s]+\s*[A-Z])/i;
     const res = [];
     const seen = new Set();
     for (const { page, text } of pageTexts) {
@@ -152,7 +360,7 @@ const ChaptersManager = (() => {
         }
       }
     }
-    return res.slice(0, 80);
+    return groupSubEntries(res).slice(0, 80);
   }
 
   // --- Chapter UI Rendering & Navigation ---
@@ -179,7 +387,7 @@ const ChaptersManager = (() => {
     }
 
     el.innerHTML = list.map((ch, i) => {
-      const subs = (ch.children || []).slice(0, 5).map((s) => `
+      const subs = (ch.children || []).map((s) => `
         <div class="ci-sub-item" onclick="event.stopPropagation(); ReaderManager.goPage(${s.page})">
           <span style="opacity:.35;font-size:.6rem">↳</span>
           <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${esc(s.title)}</span>
@@ -206,7 +414,11 @@ const ChaptersManager = (() => {
   function filterCh(q) {
     const query = (q || '').toLowerCase().trim();
     currentChapters = query
-      ? allChapters.filter((c) => c.title.toLowerCase().includes(query))
+      ? allChapters.filter(
+          (c) =>
+            c.title.toLowerCase().includes(query) ||
+            (c.children || []).some((s) => s.title.toLowerCase().includes(query))
+        )
       : [...allChapters];
     renderChList(currentChapters);
   }
